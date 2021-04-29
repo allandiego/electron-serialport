@@ -1,6 +1,6 @@
-[] native compile for:
-yarn add sqlite3
-yarn add serialport
+
+# Electron app for USB serial communication with Humacount30TS
+
 
 # LINUX PERMISSION
 port permission in linux
@@ -22,15 +22,13 @@ sudo apt-get -y install g++
 sudo apt-get -y install make
 
 
-#PACKAGE
+## PACKAGE
 "rebuild": "electron-rebuild -f -w @serialport/bindings@2.0.8",
 "install": "prebuild-install || node-gyp rebuild",
 "rebuild": "electron-rebuild -f -w @serialport/bindings@2.0.8",
 
 
-
-
-#FTDI FILE
+## FTDI USB driver FILE
 10.2  USB B connector communication
 
 the byte stream uses the ASCII characters in the range 1..255 / 0x01..0xFF in hexadecimal
@@ -40,8 +38,15 @@ HEADER:
 2 = counter (range "A" to "Z" overflow "Z" to "A")
 3 = "N" => modelos HC30/60TS
 
+## Humacount30TS
+short idVendor = 0x0403;
+short idProduct = 0x6001;
+Chip FT232R
+http://www.ftdichip.com
+
 
 BODY:
+```
 4 = "Start of Text" (<STX>, 2, 0x02)
 5 até fim body = (range 32..126,  0x20..0xFF)
 	"Horizontal  tab"  (<HT>  or  <TAB>,  9,  0x09),	if(line.substring(0, 1).equals("\t")){ }
@@ -49,17 +54,20 @@ BODY:
 	"Line  feed"  (<LF>,  10,  0x0A)					if(line.substring(0, 1).equals("\n")){ }
 body lines separated by a two-byte sequence <CR><LF>    if(line.substring(0, 1).equals("\r\n")){ } separador linha
 body is closed by "End of Text" (<ETX>, 3, 0x03).
+```
 
 
 FOOTER:
+```
 checksum  two-digit hexadecimal summing values of all characters in the message header and body, including the beginning <SOT> and <ETX>, adding 255 (hex: 0xFF) to it, and keeping only the last two hexadecimal(!) digits
 last character of a record "End of Transmission" (<EOT>, 4, 0x04)
 The next record can start right after the <EOT> character
+```
 
 
 
 10.2.2   DETAILS OF THE 3.1 PROTOCOL
-
+```
 header1 to header 8 header1 to header8 are the lab header lines these lines are defined by the user in the instrument settings any or all of these lines can be empty
 Serial No.:<HT>serial serial is the 6 digit serial number of the instrument
 RecNo:<HT>recno  recno is the internal record number, at most 6 digits
@@ -118,12 +126,4 @@ Channels:<HT>pltchannels pltchannels is the number of channels (columns) in the 
 PMarker1:<HT>pm1 pm1 is the first PLT discriminator channel (PLT start)
 PMarker2:<HT>pm2  pm2 is the second PLT discriminator channel (PLT/RBC)
 Points:<HT>ch0<HT>...<HT>ch255 chxx is the histogram height at a given channel (range 0..255), there are always pltchannels values here usually 256)
-
-
-
-
-Humacount30TS
-short idVendor = 0x0403;
-short idProduct = 0x6001;
-Chip FT232R
-http://www.ftdichip.com
+```
